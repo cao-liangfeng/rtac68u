@@ -584,7 +584,7 @@ send_headers( int status, char* title, char* extra_header, char* mime_type, int 
     if ( extra_header != (char*) 0 )
 	(void) fprintf( conn_fp, "%s\r\n", extra_header );
     if ( mime_type != (char*) 0 ){
-	if(fromapp != 0)
+	if(fromapp != FROM_BROWSER && fromapp != FROM_WebView)
 		(void) fprintf( conn_fp, "Content-Type: %s\r\n", "application/json;charset=UTF-8" );		
 	else
 		(void) fprintf( conn_fp, "Content-Type: %s\r\n", mime_type );
@@ -722,6 +722,8 @@ int check_user_agent(char* user_agent){
 				fromapp=FROM_IFTTT;
 			else if(strcmp( app_framework, "Alexa") == 0)
 				fromapp=FROM_ALEXA;
+			else if(strcmp( app_framework, "WebView") == 0)
+				fromapp=FROM_WebView;
 			else
 				fromapp=FROM_UNKNOWN;
 		}
@@ -998,7 +1000,7 @@ handle_request(void)
 						{
 							char dictname[32];
 							_dprintf("handle_request: pLang->Lang = %s\n", pLang->Lang);
-							if (!check_lang_support(pLang->Target_Lang))
+							if (!check_lang_support_merlinr(pLang->Target_Lang))
 								break;
 
 							snprintf(dictname, sizeof(dictname), "%s.dict", pLang->Target_Lang);
@@ -1214,7 +1216,7 @@ handle_request(void)
 			}
 		}
 	}
-	if ((strstr(file, "res/")))//jpg,png,js,css,html
+	else if (strstr(file, "res/"))//jpg,png,js,css,html
 	{
 		if(!check_if_file_exist(file)){
 			snprintf(scPath, sizeof(scPath), "/jffs/softcenter/");
@@ -1426,13 +1428,6 @@ handle_request(void)
 					&& !strstr(file,"cert_key.tar")
 #ifdef RTCONFIG_OPENVPN
 					&& !strstr(file, "server_ovpn.cert")
-#endif
-#ifdef RTCONFIG_SOFTCENTER
-					&& !strstr(file, "ss_conf")
-					&& !strstr(file, "ss_status")
-					&& !strstr(file, "dbconf")
-					&& !strstr(file, "Main_S")
-					&& !strstr(file, "Module_")
 #endif
 					){
 				send_error( 404, "Not Found", (char*) 0, "File not found." );
@@ -2042,6 +2037,10 @@ int main(int argc, char **argv)
 	 * it suppose to be convert after applying
 	 * time_zone_x_mapping(); */
 	setenv("TZ", nvram_safe_get_x("", "time_zone_x"), 1);
+
+#ifdef RTCONFIG_LETSENCRYPT
+	nvram_unset("le_restart_httpd");
+#endif
 
 	if (nvram_get_int("HTTPD_DBG") > 0)
 		eval("touch", HTTPD_DEBUG);
