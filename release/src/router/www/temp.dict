@@ -1,8 +1,8 @@
-﻿QIS_welcome_feature1=802.11ac дводіапазонний AC1900 пристрій. ( 600Мбіт/с /  2.4 ГГц* + 1300Мбіт/с /  5 ГГц )
-QIS_welcome_feature2=Два високошвидкісні і потужні порти USB для мережевого файлового сховища даних та з підтримкою багатофункціональних принтерів.
-QIS_welcome_feature3=4 гігабітні Ethernet-порти. 2 порти: 1 x USB 3.0 + 1 x USB 2.0 для швидкого спільного користування файлами і принтером.
-QIS_welcome_feature4=Висока ефективність для завантажень з мережі, ігор, великої кількості клієнтських підключень.
-PPTP_desc2=Для користування сервером VPN, будь ласка, виконуйте наступні кроки.<br>(1) Активуйте сервер PPTP VPN<br>(2) Вкажіть пул ІР для ІР клієнтів. (Максимум 30 клієнтів)<br>(3)Вкажіть ім\'я користувача і пароль для клієнта VPN/<br>(4) Відкрийте програму підключення VPN на комп'ютері або смартфоні.<br>(5) Додайте нове підключення PPTP VPN, і адреса сервера VPN буде
-vpn_max_clients=Сервер VPN дозволяє максимум 30 клієнтів!
-vpn_maximum_clients=Максимум 30 клієнтів
-WLANConfig11b_display2_sectiondesc=The function does not support [ WPA2-Enterprise, WPA-Auto-Enterprise ] security authentication method.
+﻿QIS_welcome_feature1=802.11ac simultane dual-band AC2334. ( 600Mbps / 2.4 GHz* + 1300Mbps / 5 GHz )
+QIS_welcome_feature2=Twee snelle en krachtig aangedreven USB-poorten voor netwerkopslag en multifunctionele printerondersteuning.
+QIS_welcome_feature3=4 x Gigabit ethernetpoorten. 1 x USB 3.0- + 1 x USB 2.0-poort voor snel delen van bestanden en printers.
+QIS_welcome_feature4=Stroomgebruik op hoog niveau voor superieur downloaden, gamingprestaties en verbindingen met meerdere clients.
+PPTP_desc2=De VPN-server gebruiken. Volg deze stappen.<br>(1) Schakel de PPTP VPN-server in<br>(2) Stel de IP-pool voor client-IP in. (Maximum 30 clients)<br>(3) Stel de gebruikersnaam en het wachtwoord voor de VPN-client in.<br>(4) Open het VPN-verbindingsprogramma op uw computer of smartphone.<br>(5) Voeg een nieuwe PPTP VPN-verbinding in en het VPN-serveradres is
+vpn_max_clients=VPN-server staat slechts max. 30 clients toe!
+vpn_maximum_clients=Maximum 30 clients
+WLANConfig11b_display2_sectiondesc=De functie biedt geen ondersteuning voor de beveiligingsverificatiemethode [WPA2-Enterprise, WPA-Auto-Enterprise].
