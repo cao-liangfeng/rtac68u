@@ -171,7 +171,6 @@ define(function(){
 				tab: [
 					{url: "Tools_Sysinfo.asp", tabName: "Sysinfo"},
 					{url: "Softcenter.asp", tabName: "<#Softcenter_tool#>"},
-					{url: "key.asp", tabName: "Verify"},
 					{url: "NULL", tabName: "__INHERIT__"}
 				] 
 			},
