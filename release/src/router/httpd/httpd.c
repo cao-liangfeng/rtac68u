@@ -1429,6 +1429,11 @@ handle_request(void)
 #ifdef RTCONFIG_OPENVPN
 					&& !strstr(file, "server_ovpn.cert")
 #endif
+#ifdef RTCONFIG_SOFTCENTER
+					&& !strstr(file, "ss_conf")
+					&& !strstr(file, "ss_status")
+					&& !strstr(file, "dbconf")
+#endif
 					){
 				send_error( 404, "Not Found", (char*) 0, "File not found." );
 				return;

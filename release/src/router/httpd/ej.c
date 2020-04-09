@@ -198,9 +198,8 @@ translate_lang (char *s, char *e, FILE *f, kw_t *pkw)
 			get_pid_len = strlen(GET_PID_STR);
 
 #if defined(R7900P) || defined(SBRAC1900P) || defined(SBRAC3200P) || defined(K3) || defined(K3C) || defined(R8000P) || defined(RAX20)
-			//char *modelname = nvram_safe_get("modelname");
 			merlinr_len = strlen(modelname);
-			if (merlinr_len && strcmp(RP_PID_STR, modelname) != 0) {
+			if (merlinr_len && strcmp(RP_PID_STR, modelname) != 0)
 				strlcpy(RP_PID_STR, modelname, merlinr_len+1);
 #else 
 			memset(RP_PID_STR, 0, sizeof(RP_PID_STR));

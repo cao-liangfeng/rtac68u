@@ -9459,9 +9459,11 @@ NO_USB_CAP:
 #endif
 
 #ifdef RTCONFIG_AMAS
+#if !defined(MERLINR_VER_MAJOR_B)
 	add_rc_support("amas");
 	if (nvram_get_int("amas_bdl"))
 	add_rc_support("amas_bdl");
+#endif
 #endif
 
 #ifdef RTCONFIG_WIFI_PROXY
