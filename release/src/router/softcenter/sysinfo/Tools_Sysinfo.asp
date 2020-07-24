@@ -47,6 +47,7 @@ var etherstate = "<% sysinfo("ethernet"); %>";
 var rtkswitch = "<% sysinfo("ethernet.rtk"); %>";
 var odmpid = "<% nvram_get("odmpid");%>";
 var ctf_fa = "<% nvram_get("ctf_fa_mode"); %>";
+var modelname = "<% nvram_get("modelname"); %>";
 overlib_str_tmp = "";
 overlib.isOut = true;
 function initial(){
@@ -217,7 +218,7 @@ function show_etherstate(){
 				continue;
 			} else if ((based_modelid == "RT-AC56U") || (based_modelid == "RT-AC56S") || (based_modelid == "RT-AC88U") || (based_modelid == "RT-AC3100")) {
 				port++;		// Port starts at 0
-				if (port == "4") port = 0;	// Last port is WAN
+				if (port == "5") port = 0;	// Last port is WAN
 			} else if (based_modelid == "RT-AC87U") {
 				if (port == "4")
 					continue;	// This is the internal LAN port
@@ -225,6 +226,9 @@ function show_etherstate(){
 					port = "4";	// This is LAN 4 (RTL) from QTN
 					devicename = '<span class="ClientName">&lt;unknown&gt;</span>';
 				}
+			} else if (modelname == "EA6700") {
+				port++;		// Port starts at 0
+				if (port == "5") port = 0;	// Last port is WAN
 			}
 			if (port == "0") {
 				wan_array = [ "WAN", (line[7] & 0xFFF), state2, devicename];
@@ -232,7 +236,7 @@ function show_etherstate(){
 			} else if (port > 4) {
 				continue;	// Internal port
 			} else {
-				if (reversed) port = 4 - port;
+				if (reversed) port = 5 - port;
 			}
 			if (reversed)
 				port_array.unshift(["LAN "+ port, (line[7] & 0xFFF), state2, devicename]);
@@ -595,3 +599,4 @@ function update_sysinfo(e){
 <div id="footer"></div>
 </body>
 </html>
+

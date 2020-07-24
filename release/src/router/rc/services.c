@@ -4182,25 +4182,13 @@ start_acsd()
 	char *acsd_argv[] = { "/usr/sbin/acsd", NULL };
 	int pid;
 #endif
-#if defined(RTAC3100) || defined(RTAC88U)
-	int txpower=26,pwr=0;
-#endif
 #ifdef RTCONFIG_PROXYSTA
 	if (psta_exist())
 		return 0;
 #endif
 
 	stop_acsd();
-#if defined(RTAC3100) || defined(RTAC88U)
-	if (nvram_match("wl0_cpenable","1")){
-		printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> set custom power 2.4G -------------------------------------\n");
-		eval("wlk","-i","eth1","txpwr1","-o","-d",nvram_safe_get("wl0_custompower"));
-	}
-	if (nvram_match("wl1_cpenable","1")){
-		printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> set custom power 5G -------------------------------------\n");
-		eval("wlk","-i","eth2","txpwr1","-o","-d",nvram_safe_get("wl1_custompower"));
-	}
-#endif
+
 	if (!restore_defaults_g && strlen(nvram_safe_get("acs_ifnames")))
 #ifdef RTCONFIG_BCM_7114
 		ret = _eval(acsd_argv, NULL, 0, &pid);
@@ -4662,9 +4650,25 @@ start_smartdns(void)
 	//fprintf(fp, "log-file /var/log/smartdns.log\n");
 	//fprintf(fp, "log-size 128k\n");
 	//fprintf(fp, "log-num 2\n");
-	fprintf(fp, "server 114.114.114.114\n");
-	fprintf(fp, "server 119.29.29.29\n");
-	fprintf(fp, "server 223.5.5.5\n");
+#if !defined(K3C) && !defined(K3) && !defined(SBRAC1900P) && !defined(SBRAC3200P) && !defined(R8000P) && !defined(R7000P) && !defined(XWR3100)
+	if(!strncmp(nvram_get("territory_code"), "CN",2)){
+#endif
+		fprintf(fp, "server 114.114.114.114\n");
+		fprintf(fp, "server 119.29.29.29\n");
+		fprintf(fp, "server 223.5.5.5\n");
+#if !defined(K3C) && !defined(K3) && !defined(SBRAC1900P) && !defined(SBRAC3200P) && !defined(R8000P) && !defined(R7000P) && !defined(XWR3100)
+	} else {
+		if(nvram_get("smartdns_dns1") && nvram_get("smartdns_dns2") && nvram_get("smartdns_dns3")){
+			fprintf(fp, "server %s\n", nvram_get("smartdns_dns1"));
+			fprintf(fp, "server %s\n", nvram_get("smartdns_dns2"));
+			fprintf(fp, "server %s\n", nvram_get("smartdns_dns3"));
+		} else {
+			fprintf(fp, "server 8.8.8.8\n");
+			fprintf(fp, "server 208.67.222.222\n");
+			fprintf(fp, "server 1.1.1.1\n");
+		}
+	}
+#endif
 	for (unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; unit++) {
 		char *wan_xdns;
 		char wan_xdns_buf[sizeof("255.255.255.255 ")*2];
