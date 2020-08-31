@@ -741,7 +741,7 @@ obj-y += smartdns
 endif
 ifeq ($(RTCONFIG_SOFTCENTER),y)
 obj-y += skipdbv2 libev-4.22 softcenter libiconv-1.14
-obj-y += ipset libmnl libnfnetlink
+obj-y += ipset libmnl-1.0.4 libnfnetlink-1.0.1
 ifeq ($(MERLINR_NAME),K3)
 obj-y += k3screenctrl
 endif
@@ -3091,7 +3091,9 @@ libev-4.22-install:
 skipdbv2/Makefile: skipdbv2/CMakeLists.txt
 	cd skipdbv2 && cmake -DCMAKE_INSTALL_PREFIX=/usr \
 	-DCMAKE_BUILD_TYPE=Release \
-	-DCMAKE_EXE_LINKER_FLAGS="-L$(STAGEDIR)/usr/lib -lev" 
+	-DCMAKE_EXE_LINKER_FLAGS="-L$(STAGEDIR)/usr/lib -lev" \
+	-DLIBEV_INCLUDE_DIRS="$(TOP)/libev-4.22" \
+	-DLIBEV_LIBRARIES="$(TOP)/libev-4.22/.libs"
 
 skipdbv2: libev-4.22 skipdbv2/Makefile
 	$(MAKE) -C $@
@@ -3131,37 +3133,13 @@ k3screenctrl-install: k3screenctrl
 	$(STRIP) $(INSTALLDIR)/k3screenctrl/usr/sbin/k3screend
 endif
 
-libmnl/stamp-h1:
-	cd $(TOP)/libmnl && CC=$(CC) STRIP=$(STRIP) \
-	CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
-	LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections" \
-	$(CONFIGURE) --prefix=/usr
-	touch libmnl/stamp-h1
-
-libmnl: libmnl/stamp-h1
-	$(MAKE) -C libmnl
-	$(MAKE) -C libmnl DESTDIR=$(TOP)/libmnl/staged install
-
-libmnl-install: libmnl
-	install -d $(INSTALLDIR)/libmnl/usr/lib/
-	install libmnl/src/.libs/libmnl.so.0.1.0 $(INSTALLDIR)/libmnl/usr/lib/libmnl.so.0.1.0
-	$(STRIP) $(INSTALLDIR)/libmnl/usr/lib/libmnl.so.0.1.0
-	cd $(INSTALLDIR)/libmnl/usr/lib/ && \
-		ln -sf libmnl.so.0.1.0 libmnl.so.0 && \
-		ln -sf libmnl.so.0.1.0 libmnl.so
-
-libmnl-clean:
-	-@$(MAKE) -C libmnl distclean
-	-@rm -rf libmnl/stamp-h1
-	-@rm -rf libmnl/staged
-
-ipset/stamp-h1: libmnl
+ipset/stamp-h1: libmnl-1.0.4
 	cd $(TOP)/ipset && CC=$(CC) STRIP=$(STRIP) \
 	autoreconf -i -f && \
 	CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
 	LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections" \
-	libmnl_CFLAGS="-I$(TOP)/libmnl/staged/usr/include" \
-	libmnl_LIBS="-L$(TOP)/libmnl/staged/usr/lib -lmnl" \
+	libmnl_CFLAGS="-I$(TOP)/libmnl-1.0.4/include" \
+	libmnl_LIBS="-L$(TOP)/libmnl-1.0.4/src/.libs -lmnl" \
 	$(CONFIGURE) --prefix=/usr --with-kmod=no --with-kbuild=$(LINUXDIR)
 	touch ipset/stamp-h1
 
@@ -3183,29 +3161,6 @@ ipset-clean:
 	-@$(MAKE) -C ipset clean
 	-@$(MAKE) -C ipset modules_clean
 	-@rm -rf ipset/Makefile ipset/stamp-h1
-
-libnfnetlink/stamp-h1:
-	cd $(TOP)/libnfnetlink && CC=$(CC) STRIP=$(STRIP) \
-		CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
-		LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections" \
-		$(CONFIGURE) --prefix=/usr --enable-shared --enable-static
-	touch libnfnetlink/stamp-h1
-
-libnfnetlink: libnfnetlink/stamp-h1
-	@$(SEP)
-	$(MAKE) -C libnfnetlink
-
-libnfnetlink-install:
-	install -D libnfnetlink/src/.libs/libnfnetlink.so.0.2.0 $(INSTALLDIR)/libnfnetlink/usr/lib/libnfnetlink.so.0.2.0
-	$(STRIP) -s $(INSTALLDIR)/libnfnetlink/usr/lib/libnfnetlink.so.0.2.0
-	cd $(INSTALLDIR)/libnfnetlink/usr/lib/ && \
-		ln -sf libnfnetlink.so.0.2.0 libnfnetlink.so.0 && \
-		ln -sf libnfnetlink.so.0.2.0 libnfnetlink.so
-
-libnfnetlink-clean:
-	-@$(MAKE) -C libnfnetlink distclean
-	@rm -f libnfnetlink/stamp-h1
-
 endif
 
 ifeq ($(RTCONFIG_SMARTDNS),y)
