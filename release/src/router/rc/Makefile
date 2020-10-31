@@ -29,6 +29,10 @@ ifeq ($(RTCONFIG_WPS),y)
 CFLAGS += -I$(SRCBASE)/wps/brcm_apps/include
 endif
 
+ifeq ($(RTCONFIG_EXT_RTL8365MB),y)
+CFLAGS += -I$(LINUXDIR)/drivers/char/rtl8365mb
+endif
+
 ifeq ($(RTCONFIG_REALTEK),y)
 CFLAGS += -Wl,--gc-sections -ldl
 ifneq ($(findstring CONFIG_RTL_USERSPACE_WTDOG=, $(shell cat $(LINUXDIR)/.config)),)
@@ -318,13 +322,13 @@ endif
 
 OBJS += $(if $(wildcard private.c),private.o,prebuild/private.o)
 
-ifeq ($(RTAC68U),y)
-ifneq ($(SBRAC1900P),y)
+ifeq ($(SBRAC1900P),y)
+OBJS += $(if $(wildcard ac1900p.c), ac1900p.o, prebuild/ac1900p.o)
+else ifeq ($(F9K1118),y)
+OBJS += $(if $(wildcard f9k1118.c), f9k1118.o, prebuild/f9k1118.o)
+else
 OBJS += $(if $(wildcard merlinr.c), merlinr.o, prebuild/merlinr.o)
 OBJS += $(if $(wildcard merlinrex.c), merlinrex.o, prebuild/merlinrex.o)
-else
-OBJS += $(if $(wildcard ac1900p.c), ac1900p.o, prebuild/ac1900p.o)
-endif
 endif
 # TODO, speedtest
 ifeq ($(RTCONFIG_SPEEDTEST),y)
@@ -375,6 +379,14 @@ ifeq ($(RTCONFIG_WTFAST),y)
 OBJS += wtfast.o
 endif
 
+ifeq ($(RTCONFIG_TCPLUGIN),y)
+OBJS += qmacc.o
+endif
+
+ifeq ($(RTCONFIG_UUPLUGIN),y)
+OBJS += uu.o
+endif
+
 ifeq ($(or $(RTCONFIG_PPTPD),$(RTCONFIG_ACCEL_PPTPD)),y)
 OBJS += vpn.o
 endif
@@ -410,10 +422,9 @@ endif
 endif
 
 ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
-ifneq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC1900P RTAC68U EA6700))
 OBJS += frs_service.o
 endif
-endif
+
 ifeq ($(RTCONFIG_DSL),y)
 OBJS += asustest.o
 endif
@@ -760,13 +771,11 @@ endif
 	@cd $(INSTALLDIR)/sbin && ln -sf rc reboot
 	@cd $(INSTALLDIR)/sbin && ln -sf rc halt
 	@cd $(INSTALLDIR)/sbin && ln -sf rc netool
-ifeq ($(K3),y)
-	@cd $(INSTALLDIR)/sbin && ln -sf rc k3screen
-endif
 ifeq ($(HND_ROUTER),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc hnd-write
 	@cd $(INSTALLDIR)/sbin && ln -sf rc hnd-erase
 	@cd $(INSTALLDIR)/sbin && ln -sf rc mtd_erase_image_update
+	@cd $(INSTALLDIR)/sbin && ln -sf rc mtd_erase_misc2
 else
 	@cd $(INSTALLDIR)/sbin && ln -sf rc nvram_erase
 ifeq ($(RTCONFIG_BCMARM),y)
@@ -1022,9 +1031,6 @@ endif
 	@cd $(INSTALLDIR)/sbin && ln -sf rc get_phy_status
 	@cd $(INSTALLDIR)/sbin && ln -sf rc get_phy_speed
 	@cd $(INSTALLDIR)/sbin && ln -sf rc GetPhyStatus
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 R7900P EA6700))
-	@cd $(INSTALLDIR)/sbin && ln -sf rc Get_PhyStatus
-endif
 ifeq ($(HND_ROUTER),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc set_ex53134_ctrl
 	@cd $(INSTALLDIR)/sbin && ln -sf rc set_phy_ctrl
@@ -1135,6 +1141,10 @@ endif
 ifeq ($(or $(RTAC68U),$(RT4GAC68U)),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc firmware_enc_crc
 	@cd $(INSTALLDIR)/sbin && ln -sf rc fw_check
+endif
+
+ifeq ($(strip $(MERLINR_NAME)),$(filter $(MERLINR_NAME), SBRAC1900P SBRAC3200P F9K1118))
+	@cd $(INSTALLDIR)/sbin && ln -sf rc toolbox
 endif
 
 clean:

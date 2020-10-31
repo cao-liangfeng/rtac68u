@@ -915,7 +915,7 @@ apply.yadnsDisable = function(){
 apply.yadnsSetting = function(){
 	httpApi.nvramSet((function(){
 		qisPostData.action_mode = "apply";
-		qisPostData.rc_service = "restart_yadns";
+		qisPostData.rc_service = getRestartService();
 		return qisPostData;
 	})(), (systemVariable.isNewFw == 0) ? goTo.Finish : goTo.Update);
 };
@@ -1158,20 +1158,8 @@ abort.wanType = function(){
 	}
 	else if(systemVariable.detwanResult.wanType == "CHECKING"){
 		systemVariable.manualWanSetup = false;
-
-		setTimeout(function(){
-			if(!isPage("waiting_page")) return false;
-
-			if(systemVariable.detwanResult.wanType == "" || systemVariable.detwanResult.wanType == "CHECKING"){
-				systemVariable.detwanResult = httpApi.detwanGetRet();
-				if(isPage("waiting_page")) setTimeout(arguments.callee, 1000);
-				return false;
-			}
-
-			if(!systemVariable.manualWanSetup) goTo.autoWan();	
-		}, 1000);
-
-		goTo.loadPage("waiting_page", true);	
+		goTo.loadPage("waiting_page", true);
+		goTo.Waiting();
 	}
 	else{
 		if(!systemVariable.forceChangePw)
@@ -1776,7 +1764,7 @@ goTo.rpMode = function(){
 		qisPostData.wlc_psta = 2;
 		qisPostData.wlc_dpsta = 1;
 	}
-	else if((isSdk("7") || isSdk("9")) && isSupport("bcmwifi")){
+	else if(isSupport("amas") && isSupport("bcmwifi")){
 		qisPostData.sw_mode = 3;
 		qisPostData.wlc_psta = 2;
 		qisPostData.wlc_dpsta = 0;

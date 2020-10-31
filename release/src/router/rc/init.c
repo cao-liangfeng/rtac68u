@@ -359,7 +359,7 @@ misc_ioctrl(void)
 		case MODEL_RTAC86U:
 		case MODEL_RTAC3100:
 #ifdef RTAC68U
-			if (!is_ac66u_v2_series())
+			if (!is_ac66u_v2_series() && !is_ac68u_v3_series())
 				return;
 #endif
 
@@ -1121,10 +1121,10 @@ void usbctrl_default()
 
 		http_passwd = nvram_safe_get("http_passwd");
 #ifdef RTCONFIG_NVRAM_ENCRYPT
-		int declen = pw_dec_len(http_passwd);
+		int declen = strlen(http_passwd);
 		char dec_passwd[declen];
 		memset(dec_passwd, 0, sizeof(dec_passwd));
-		pw_dec(http_passwd, dec_passwd);
+		pw_dec(http_passwd, dec_passwd, sizeof(dec_passwd));
 
 		char_to_ascii_safe(ascii_passwd, dec_passwd, 84);
 
@@ -1566,7 +1566,7 @@ misc_defaults(int restore_defaults)
 
 	if (restore_defaults)
 	{
-#if defined(RTCONFIG_JFFS2) || defined(RTCONFIG_BRCM_NAND_JFFS2)
+#if (defined(RTCONFIG_JFFS2) || defined(RTCONFIG_BRCM_NAND_JFFS2)) && !defined(RTCONFIG_JFFS_NVRAM)
 		nvram_set("jffs2_clean_fs", "1");
 #elif defined(RTCONFIG_YAFFS)
 		nvram_set("yaffs_clean_fs", "1");
@@ -4012,6 +4012,7 @@ int init_nvram(void)
 		add_rc_support("switchctrl");
 		add_rc_support("manual_stb");
 		add_rc_support("11AC");
+		add_rc_support("gameMode");
 		add_rc_support("app");
 		//add_rc_support("pwrctrl");
 		// the following values is model dep. so move it from default.c to here
@@ -5434,6 +5435,26 @@ int init_nvram(void)
 		nvram_set("wl0_HT_RxStream", "2");
 		nvram_set("wl1_HT_TxStream", "4");
 		nvram_set("wl1_HT_RxStream", "4");
+#if defined(RTCONFIG_AMAS) || defined(RTCONFIG_CFGSYNC)
+		nvram_set("wired_ifnames", "eth1");
+#endif
+#if defined(RTCONFIG_AMAS) && defined(RTCONFIG_QCA_LBD)
+		if (sw_mode()!=SW_MODE_REPEATER) {
+			nvram_set("qca_lbd_enable", "1");
+		}
+#endif
+
+#ifdef RTCONFIG_AMAS
+		if (sw_mode() == SW_MODE_AP && nvram_match("re_mode", "1")) {
+			_dprintf("[%s][%d] sw mode = %d, repeater=%d, ap= %d ",
+						__func__, __LINE__,
+						sw_mode(),SW_MODE_REPEATER,SW_MODE_AP);
+			nvram_set("eth_ifnames", "eth0");
+			nvram_set("sta_phy_ifnames", "sta0 sta1");
+			nvram_set("sta_ifnames", "sta0 sta1");
+			nvram_unset("dfschinfo");
+		}
+#endif
 		break;
 #endif //RTAC82U
 
@@ -5951,6 +5972,7 @@ int init_nvram(void)
 		add_rc_support("movistarTriple");
 		add_rc_support("11AC");
 		add_rc_support("app");
+		add_rc_support("gameMode");
 
 		// the following values is model dep. so move it from default.c to here
 		nvram_set("wl0_HT_TxStream", "4");
@@ -7150,6 +7172,7 @@ int init_nvram(void)
 			nvram_set_int("btn_led_gpio", 5);		// active high
 #endif
 #ifdef RTCONFIG_LOGO_LED
+			if (!is_ac68u_v3_series())
 			nvram_set_int("led_logo_gpio", 4|GPIO_ACTIVE_LOW);
 #endif
 			nvram_set_int("led_usb_gpio", 0|GPIO_ACTIVE_LOW);
@@ -7178,7 +7201,8 @@ int init_nvram(void)
 #if !defined(EA6700)
 			nvram_set_int("btn_wltog_gpio", 15|GPIO_ACTIVE_LOW);
 #endif
-#endif
+			if (is_ac68u_v3_series())
+				nvram_set_int("led_wan_gpio", 4);
 		} else {
 			nvram_set_int("led_pwr_gpio", 0|GPIO_ACTIVE_LOW);
 			nvram_set_int("led_wan_gpio", 5);
@@ -7257,6 +7281,7 @@ int init_nvram(void)
 #ifndef RT4GAC68U
 		if (hw_usb_cap())
 		add_rc_support("app");
+		add_rc_support("gameMode");
 #endif
 		if (!hw_vht_cap())
 			add_rc_support("no_vht");
@@ -7436,6 +7461,7 @@ int init_nvram(void)
 		add_rc_support("meoVoda");
 		add_rc_support("movistarTriple");
 		add_rc_support("app");
+		add_rc_support("gameMode");
 
 		break;
 #endif
@@ -7604,6 +7630,7 @@ int init_nvram(void)
 		add_rc_support("movistarTriple");
 		add_rc_support("wifi2017");
 		add_rc_support("meoVoda");
+		add_rc_support("gameMode");
 		add_rc_support("app");
 		if (!strncmp(nvram_safe_get("territory_code"), "CX", 2)) {
 			add_rc_support("nz_isp");
@@ -7830,6 +7857,9 @@ int init_nvram(void)
 		add_rc_support("meoVoda");
 		add_rc_support("movistarTriple");
 		add_rc_support("app");
+#if defined(RTAC88U)
+		add_rc_support("gameMode");
+#endif			
 		nvram_set("ehci_irq", "111");
 		nvram_set("xhci_irq", "112");
 #ifdef RTCONFIG_MMC_LED
@@ -9251,6 +9281,12 @@ NO_USB_CAP:
 
 #ifdef RTCONFIG_HTTPS
 	add_rc_support("HTTPS");
+
+	/* workaround : openssl self-signed certificate from old firmware version */
+	// force to enable https_crt_save to store certificate
+	if (nvram_get_int("https_crt_save") == 0) {
+		nvram_set_int("https_crt_save", 1);
+	}
 #ifdef RTCONFIG_LETSENCRYPT
 	add_rc_support("letsencrypt");
 #endif
@@ -10709,7 +10745,7 @@ static void sysinit(void)
 
 	if (!nvram_match("disable_gmac3_force", "1")
 #if defined(RTCONFIG_BCMWL6) && defined(RTCONFIG_PROXYSTA)
-		&& !psr_mode()
+		&& !psr_mode() && !psta_exist()
 #endif
 #ifdef RTCONFIG_DPSTA
 		&& !dpsta_mode()
@@ -10750,6 +10786,13 @@ static void sysinit(void)
 	nvram_set("success_start_service", "0");
 #endif
 	init_nvram();  // for system indepent part after getting model
+#ifdef RTCONFIG_JFFS_NVRAM
+	if(RESTORE_DEFAULTS()) {
+		nvram_set("jffs2_on", "1");
+		nvram_set("jffs2_clean_fs", "1");
+	}
+	start_jffs2();
+#endif
 	restore_defaults(); // restore default if necessary
 	init_nvram2();
 
@@ -10781,6 +10824,7 @@ static void sysinit(void)
 	gmac3_restore_nvram();
 #endif
 #endif
+	nvram_set("label_mac", get_label_mac());
 
 #if defined(RPAC51)
 	write_caldata_file();
@@ -11001,7 +11045,7 @@ int init_main(int argc, char *argv[])
 		}
 		sigprocmask(SIG_BLOCK, &sigset, NULL);
 
-#if !defined(RTCONFIG_TEST_BOARDDATA_FILE)
+#if !defined(RTCONFIG_TEST_BOARDDATA_FILE) && !defined(RTCONFIG_JFFS_NVRAM)
 		start_jffs2();
 #endif
 #ifdef RTCONFIG_NVRAM_ENCRYPT

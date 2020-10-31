@@ -71,7 +71,7 @@ export PATH := $(RELEASEDIR)/tools:$(SRCBASE)/ctools:$(PATH)
 #aimesh:R(384 and 385),non-aimesh:B(382 and 384),special:X(382/384/385/386)
 export MERLINR_NAME :=RTAC68U
 export MERLINR_VER_MAJOR :=R
-export MERLINR_VER_MINOR :=5.1.2
+export MERLINR_VER_MINOR :=5.1.3b
 export MERLINR_VER := $(MERLINR_VER_MAJOR)$(MERLINR_VER_MINOR)
 export MERLINRVER := $(MERLINR_NAME)_$(MERLINR_VER)
 
@@ -2713,11 +2713,9 @@ define RouterOptions
 		echo "RTCONFIG_MASTER_DET=y" >>$(1); \
 		sed -i "/RTCONFIG_ADV_RAST/d" $(1); \
 		echo "RTCONFIG_ADV_RAST=y" >>$(1); \
-		if [ "$(BTM_11V)" = "y" ]; then \
-			if [ "$(INFO_EXAP)" = "y" ]; then \
-				sed -i "/RTCONFIG_CONN_EVENT_TO_EX_AP/d" $(1); \
-				echo "RTCONFIG_CONN_EVENT_TO_EX_AP=y" >>$(1); \
-			fi; \
+		if [ "$(INFO_EXAP)" = "y" ]; then \
+			sed -i "/RTCONFIG_CONN_EVENT_TO_EX_AP/d" $(1); \
+			echo "RTCONFIG_CONN_EVENT_TO_EX_AP=y" >>$(1); \
 		fi; \
 		if [ "$(LANTIQ)" = "y" ]; then \
 			sed -i "/RTCONFIG_HAPDEVENT/d" $(1); \
@@ -2902,6 +2900,10 @@ define RouterOptions
 		echo "RTCONFIG_AMAZON_WSS=y" >>$(1); \
 		sed -i "/RTCONFIG_GN_WBL\>/d" $(1); \
 		echo "RTCONFIG_GN_WBL=y" >>$(1); \
+	fi; \
+	if [ -n "$(CAPTCHA)" ]; then \
+		sed -i "/RTCONFIG_CAPTCHA/d" $(1); \
+		echo "RTCONFIG_CAPTCHA=y" >>$(1); \
 	fi; \
 	if [ "$(SOFTCENTER)" = "y" ]; then \
 	sed -i "/RTCONFIG_SOFTCENTER/d" $(1); \

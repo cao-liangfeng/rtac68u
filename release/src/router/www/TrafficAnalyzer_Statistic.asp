@@ -54,8 +54,8 @@
 .clean_log {
 	float: right;
 	background-image: url("images/New_ui/delete.svg");
-	height: 35px;
-	width: 35px;
+	height: 26px;
+	width: 26px;
 	background-repeat: no-repeat;
 	margin-right: 10px;
 	cursor: pointer;
@@ -88,6 +88,8 @@ function initial(){
 	setTimeout(function(){
 		get_wan_data("all", "hour", "24", date_second, date_string);
 	}, 1000);
+
+	$('#traffic_unit').val(getTrafficUnit());
 
 	if(!ASUS_EULA.status("tm"))
 		ASUS_EULA.config(eula_confirm, cancel);
@@ -130,7 +132,7 @@ function get_client_used_apps_info(client_index, used_data_array, top5_info, typ
 	var description = "";
 
 	if(type == "router"){
-		document.getElementById('top_client_title').innerHTML = "<#Client_Name#>:";
+		document.getElementById('top_client_title').innerHTML = "<#MAC_Address#>:";
 		if(period == "monthly"){
 			description = "<#traffic_analysis_top5client_monthly#>";
 		}
@@ -276,17 +278,42 @@ function show_individual_info_block(client_index, type){
 	}
 }
 
+function getTrafficUnit(){
+	var value = 9;
+	if(cookie.get('ASUS_Traffic_unit')){
+		value = cookie.get('ASUS_Traffic_unit');
+	}
+
+	return value;
+}
+
 function translate_traffic(flow){
 	var flow_unit = "Bytes";
-	if(flow > 1024){
-		flow_unit = "KB";
-		flow = flow/1024;
+	var unit = getTrafficUnit();
+
+	if(unit == '1'){
+		flow_unit = "MB";
+		flow = flow/1024/1024;
+	}
+	else if(unit == '2'){
+		flow_unit = "GB";
+		flow = flow/1024/1024/1024;
+	}
+	else if( unit == '3'){
+		flow_unit = "TB";
+		flow = flow/1024/1024/1024/1024;
+	}
+	else{
 		if(flow > 1024){
-			flow_unit = "MB";
+			flow_unit = "KB";
 			flow = flow/1024;
 			if(flow > 1024){
-				flow_unit = "GB";
+				flow_unit = "MB";
 				flow = flow/1024;
+				if(flow > 1024){
+					flow_unit = "GB";
+					flow = flow/1024;
+				}
 			}
 		}
 	}
@@ -1473,6 +1500,14 @@ function getClientCurrentName(_mac) {
 function updateTrafficAnalyzer() {
 	initial();
 }
+
+function setUnit(unit){
+	cookie.set('ASUS_Traffic_unit', unit);
+	draw_flow(date_string, router_traffic_array);
+	get_client_used_apps_info(top5_client_array[0], client_used_app_array, top5_client_array, "router");
+	$('#current_traffic_field').html('');
+	$('#current_traffic_percent_field').html('');
+}
 </script>
 </head>
 <body onload="initial();" onunload="unload_body();" class="bg">
@@ -1595,6 +1630,14 @@ function updateTrafficAnalyzer() {
 																			<option value="daily" selected><#diskUtility_daily#></option>
 																		</select>
 																	</td>
+																	<td>
+																		<select class="input_option" id="traffic_unit" onChange="setUnit(this.value)">
+																			<option value="1">MB</option>
+																			<option value="2">GB</option>
+																			<option value="3">TB</option>
+																			<option value="9"><#Auto#></option>
+																		</select>
+																	</td>
 																</tr>
 															</table>
 														</div>
@@ -1640,7 +1683,7 @@ function updateTrafficAnalyzer() {
 													<div id="top5_info_block" style="width:310px;min-height:330px;;background-color:#B3645B;border-bottom-right-radius:10px;border-bottom-left-radius:10px;border-top-right-radius:10px;box-shadow: 3px 5px 5px #2E3537;">
 														<table style="width:99%;padding-top:20px">
 															<tr>
-																<th style="font-size:16px;text-align:left;padding-left:10px;width:140px;color:#ADADAD" id="top_client_title"><#ParentalCtrl_username#>:</th>
+																<th style="font-size:16px;text-align:left;padding-left:10px;width:140px;color:#ADADAD" id="top_client_title"><#MAC_Address#>:</th>
 																<td style="font-size:14px;" id="top_client_name"></td>
 															</tr>
 															<tr>

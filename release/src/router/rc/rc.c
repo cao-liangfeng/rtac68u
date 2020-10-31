@@ -44,6 +44,8 @@
 #include "ac1900p.h"
 #elif defined(SBRAC3200P)
 #include "ac3200p.h"
+#elif defined(F9K1118)
+#include <f9k1118.h>
 #else
 #include "merlinr.h"
 #endif
@@ -1284,7 +1286,7 @@ static const applets_t applets[] = {
 #ifdef RTCONFIG_ADTBW
 	{ "adtbw",			adtbw_main		},
 #endif
-#if defined(SBRAC1900P) || defined(SBRAC3200P)
+#if defined(SBRAC1900P) || defined(SBRAC3200P) || defined(F9K1118)
 	{ "toolbox",			merlinr_toolbox		},
 #endif
 	{NULL, NULL}
@@ -2194,7 +2196,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 #ifdef RTCONFIG_BCMARM
-#if defined(RTAC1200G) || defined(RTAC1200GP)
+#if defined(RTAC1200G) || defined(RTAC1200GP) || defined(F9K1118)
 	/* mtd-erase2 [device] */
 	else if (!strcmp(base, "mtd-erase2")) {
 		if (argv[1] && ((!strcmp(argv[1], "boot")) ||
