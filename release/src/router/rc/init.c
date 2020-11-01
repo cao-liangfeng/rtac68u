@@ -7201,6 +7201,7 @@ int init_nvram(void)
 #if !defined(EA6700)
 			nvram_set_int("btn_wltog_gpio", 15|GPIO_ACTIVE_LOW);
 #endif
+#endif
 			if (is_ac68u_v3_series())
 				nvram_set_int("led_wan_gpio", 4);
 		} else {
