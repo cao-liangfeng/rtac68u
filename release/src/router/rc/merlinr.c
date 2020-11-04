@@ -202,9 +202,6 @@ void merlinr_init_done()
 	tm1900_check();
 #endif
 #if defined(MERLINR_VER_MAJOR_B)
-	//华硕似乎实现了aimesh的webui和aimesh核心剥离，从而实现382和384共用一个webui，384则强制显示aimesh界面，禁掉它，防止误导
-	//disable aimesh webui,asus splits aimesh into two parts,aimesh webui and aimesh core
-	//aimesh core does not work in this firmware,so disable aimesh webui
 	del_rc_support("amasRouter");
 	del_rc_support("amas");
 #endif
@@ -601,13 +598,6 @@ void exec_uu_merlinr()
 			free(dup_pattern);
 		}
 	}
-}
-#endif
-
-#if !defined(RTAC68U) && !defined(GTAC5300) && !defined(GTAC2900) && !defined(RTAC86U)
-void start_sendfeedback(void)
-{
-
 }
 #endif
 
