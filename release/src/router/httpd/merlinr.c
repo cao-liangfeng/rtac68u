@@ -42,7 +42,7 @@ extern int is_rp_express_2g();
 extern int is_rp_express_5g();
 extern int is_concurrep();
 extern int is_aicloudipk();
-extern int RCisSupport();
+extern int RCisSupport(char *name);
 extern int is_hnd();
 extern int is_localap();
 extern int usbPortMax();
@@ -67,7 +67,7 @@ int is_uu_accel_merlinr()
 	productid = nvram_safe_get("productid");
 	odmpid = get_productid();
 	tcode = nvram_safe_get("territory_code");
-	if(nvram_get_int("uu_enable") == 0)
+	if(!nvram_get("uu_enable") || nvram_get_int("uu_enable")== 0)
 		return 0;
 #if defined(R7000P) || defined(K3) || defined(SBRAC1900P) || defined(SBRAC3200P)
 	return 1;
@@ -101,14 +101,13 @@ int is_uu_accel_merlinr()
 
 int DPIisSupport_merlinr(const char *name)
 {
+#if !defined(R7000P)
 	if (!strcmp(name, "dpi_mals"))
 		return dump_dpi_support(INDEX_MALS);
-
 	if (!strcmp(name, "dpi_vp"))
 		return dump_dpi_support(INDEX_VP);
 	if (!strcmp(name, "dpi_cc"))
 		return dump_dpi_support(INDEX_CC);
-#if !defined(R7000P)
 	if (!strcmp(name, "adaptive_qos"))
 		return dump_dpi_support(INDEX_ADAPTIVE_QOS);
 #endif
